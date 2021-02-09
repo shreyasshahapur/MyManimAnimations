@@ -1,4 +1,4 @@
-from manimlib.imports import *
+from manim import *
 
 
 def show_positional_values_2D(self, obj):
