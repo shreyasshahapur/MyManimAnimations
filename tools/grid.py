@@ -1,95 +1,61 @@
-# From elteoremadebeethoven
-# https://github.com/Elteoremadebeethoven/MyAnimations/blob/fceed6e59d0fd100ad8c9b67fbb3cce18c763090/screen_grid/screen_grid.py
+from manim import *
 
-from manimlib.imports import *
 
-class Grid(VMobject):
-    CONFIG = {
-        "height": 6.0,
-        "width": 6.0,
-    }
+class GridAxes(VMobject):
 
-    def __init__(self, rows, columns, **kwargs):
-        digest_config(self, kwargs, locals())
+    def __init__(self, height=4, width=7, color_axes=BLUE, **kwargs):
+        self.height = height
+        self.width = width
+        self.color_axes = color_axes
+
         VMobject.__init__(self, **kwargs)
 
-    def generate_points(self):
-        x_step = self.width / self.columns
-        y_step = self.height / self.rows
+        x_axis = Line(start=self.width * LEFT, end=self.width * RIGHT).set_color(self.color_axes)
+        y_axis = Line(start=self.height * DOWN, end=self.height * UP).set_color(self.color_axes)
 
-        for x in np.arange(0, self.width + x_step, x_step):
-            self.add(Line(
-                [x - self.width / 2., -self.height / 2., 0],
-                [x - self.width / 2., self.height / 2., 0],
-            ))
-        for y in np.arange(0, self.height + y_step, y_step):
-            self.add(Line(
-                [-self.width / 2., y - self.height / 2., 0],
-                [self.width / 2., y - self.height / 2., 0]
-            ))
+        axes = VGroup(x_axis, y_axis)
+        self.add(axes)
 
+        for x in range(-width, width + 1):
+            num = Tex(str(x)) \
+                .scale(0.6) \
+                .next_to(x_axis, DOWN) \
+                .shift(x*RIGHT)
 
-class ScreenGrid(VGroup):
-    CONFIG = {
-        "rows":8,
-        "columns":14,
-        "height": FRAME_Y_RADIUS*2,
-        "width": 14,
-        "grid_stroke":0.5,
-        "grid_color":WHITE,
-        "axis_color":RED,
-        "axis_stroke":2,
-        "show_points":False,
-        "point_radius":0,
-        "labels_scale":0.5,
-        "labels_buff":0,
-        "number_decimals":2
-    }
+            self.add(num)
 
-    def __init__(self,**kwargs):
-        VGroup.__init__(self,**kwargs)
-        rows=self.rows
-        columns=self.columns
-        grilla=Grid(width=self.width,height=self.height,rows=rows,columns=columns).set_stroke(self.grid_color,self.grid_stroke)
+        for y in range(-height, height + 1):
+            num = Tex(str(y)) \
+                .scale(0.6) \
+                .next_to(y_axis, LEFT) \
+                .shift(y * UP)
 
-        vector_ii=ORIGIN+np.array((-self.width/2,-self.height/2,0))
-        vector_id=ORIGIN+np.array((self.width/2,-self.height/2,0))
-        vector_si=ORIGIN+np.array((-self.width/2,self.height/2,0))
-        vector_sd=ORIGIN+np.array((self.width/2,self.height/2,0))
-
-        ejes_x=Line(LEFT*self.width/2,RIGHT*self.width/2)
-        ejes_y=Line(DOWN*self.height/2,UP*self.height/2)
-
-        ejes=VGroup(ejes_x,ejes_y).set_stroke(self.axis_color,self.axis_stroke)
-
-        divisiones_x=self.width/columns
-        divisiones_y=self.height/rows
-
-        direcciones_buff_x=[UP,DOWN]
-        direcciones_buff_y=[RIGHT,LEFT]
-        dd_buff=[direcciones_buff_x,direcciones_buff_y]
-        vectores_inicio_x=[vector_ii,vector_si]
-        vectores_inicio_y=[vector_si,vector_sd]
-        vectores_inicio=[vectores_inicio_x,vectores_inicio_y]
-        tam_buff=[0,0]
-        divisiones=[divisiones_x,divisiones_y]
-        orientaciones=[RIGHT,DOWN]
-        puntos=VGroup()
-        leyendas=VGroup()
+            self.add(num)
 
 
-        for tipo,division,orientacion,coordenada,vi_c,d_buff in zip([columns,rows],divisiones,orientaciones,[0,1],vectores_inicio,dd_buff):
-            for i in range(1,tipo):
-                for v_i,direcciones_buff in zip(vi_c,d_buff):
-                    ubicacion=v_i+orientacion*division*i
-                    punto=Dot(ubicacion,radius=self.point_radius)
-                    coord=round(punto.get_center()[coordenada],self.number_decimals)
-                    leyenda=TextMobject("%s"%coord).scale(self.labels_scale)
-                    leyenda.next_to(punto,direcciones_buff,buff=self.labels_buff)
-                    puntos.add(punto)
-                    leyendas.add(leyenda)
+class Grid(GridAxes):
 
-        self.add(grilla,ejes,leyendas)
-        if self.show_points==True:
-            self.add(puntos)
+    def __init__(self, line_type="dashed", color_lines=WHITE, **kwargs):
+        self.line_type = line_type
+        self.color_lines = color_lines
+
+        GridAxes.__init__(self, **kwargs)
+
+        # Lines parallel to the x axis
+        x_lines = VGroup()
+        for y in (list(range(-self.height, 0)) + list(range(1, self.height + 1))):
+            x_lines.add(DashedLine(start=self.width * LEFT + y * DOWN, end=self.width * RIGHT + y * DOWN,
+                                   dash_length=0.12, positive_space_ratio=0.6)
+                        .set_color(self.color_lines))
+        x_lines.set_stroke(width=0.75)
+
+        # Lines parallel to the y axis
+        y_lines = VGroup()
+        for x in (list(range(-self.width, 0)) + list(range(1, self.width + 1))):
+            y_lines.add(DashedLine(start=self.height * UP + x * RIGHT, end=self.height * DOWN + x * RIGHT,
+                                   dash_length=0.12, positive_space_ratio=0.6).set_color(self.color_lines))
+        y_lines.set_stroke(width=0.75)
+
+        self.add(x_lines)
+        self.add(y_lines)
 

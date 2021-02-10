@@ -80,3 +80,5 @@ def show_critical_coords_2D(self, obj):
             TextMobject(center_text).scale(0.6).next_to(obj.get_critical_point(ORIGIN), UP)
         )
     )
+
+    line = Line()

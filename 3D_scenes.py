@@ -15,4 +15,4 @@ class Test_3D(SpecialThreeDScene):
         )
 
         self.set_camera_orientation(gamma=60*DEGREES)
-        self.move_camera(theta=60*DEGREES)
+        self.move_camera(theta=60*DEGREES, gamma=60*DEGREES)
